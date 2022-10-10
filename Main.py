@@ -7,22 +7,20 @@ from tools.files import dict_to_file
 from tools.study import StudyBot
 from tools.markups import main_menu_markups, empty_markups
 
-# os.environ["API_TOKEN"] = ""
-API_TOKEN = os.environ.get('BOT_API_TOKEN')
 
+API_TOKEN = os.environ.get('BOT_API_TOKEN')
 
 # Exit if API key not exist
 if API_TOKEN is None:
     print('ERROR: Can`t run Bot. Bot API_TOKEN not available.')
     exit()
 
+
 # os.environ["API_TOKEN"]
 bot = telebot.TeleBot(API_TOKEN, parse_mode=None)
 
 # set study object
 study_bot = StudyBot(bot)
-
-USER_WORDS_DICT = {}
 
 
 @bot.message_handler(commands=['start'])

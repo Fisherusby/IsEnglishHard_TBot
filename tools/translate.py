@@ -104,7 +104,7 @@ def get_translate(word):
     Get information about word from database. If there isn't word in database get word information from sources.
     Sources is https://englishlib.org/ (for transcription) and Translator (for translate)
     """
-    query_word = session.query(Word).filter(Word.en == word, Word.is_translate == True).first()
+    query_word = session.query(Word).filter(Word.en == word, Word.is_translate is True).first()
     print(f'Get word: {word}')
     if query_word is None:
         try:
@@ -131,7 +131,7 @@ def get_translate(word):
             # print(f'{sentences = }')
             add_sentence(tbl_sent[i].text, tbl_sent[i+1].text)
         print(f'   sentences add in base')
-        query_word = session.query(Word).filter(Word.en == word, Word.is_translate == False).first()
+        query_word = session.query(Word).filter(Word.en == word, Word.is_translate is False).first()
 
         if query_word is not None:
             query_word.ru = translate_text.text

@@ -39,7 +39,7 @@ class StudyBot:
         stats_text = '📈 Statistics:\n'
         stats_text += f'📝 total word count - {total}\n'
         stats_text += f'✅ passed - {total - in_dict}\n'
-        stats_text += f'❌ error count - {total_fails}\n'
+        stats_text += f'❌ mistakes - {total_fails}\n'
         stats_text += f'🔴 words with mistakes - {len(fails_by_words)}\n'
         self.__bot.send_message(user_id, stats_text)
 
