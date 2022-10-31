@@ -81,7 +81,7 @@ def add_links_words_sentence(sentence):
         # print(f'{word = } , {word.id = } {word.en = }')
         # print(f'{sentence.words = }')
         sentence.words.append(word)
-    print(f'{sentence.words = }')
+    # print(f'{sentence.words = }')
     session.commit()
 
 
@@ -119,8 +119,11 @@ def get_translate(word):
         html = BS(r.text, 'html.parser')
         body = html
         div_tr = body.find('div', {"id": "uk_tr_sound"})
+
         if not div_tr:
-            print(f'   word not found in the sources')
+            print(body)
+            print(f'   WARNING!!! Word not found in the sources')
+            print(f'https://englishlib.org/dictionary/en-ru/{word}.html')
             return False
         transcription = div_tr.find('big')
         section = body.find_all('section', {'class': 'phrases_t'})
@@ -131,15 +134,16 @@ def get_translate(word):
             # print(f'{sentences = }')
             add_sentence(tbl_sent[i].text, tbl_sent[i+1].text)
         print(f'   sentences add in base')
-        query_word = session.query(Word).filter(Word.en == word, Word.is_translate is False).first()
-
-        if query_word is not None:
+        query_word = session.query(Word).filter(Word.en == word).first()
+        # print(query_word)
+        if query_word is None:
+            query_word = Word(en=word, ru=translate_text.text, transcription=transcription.text[1:])
+            session.add(query_word)
+        elif query_word.is_translate is False:
             query_word.ru = translate_text.text
             query_word.transcription = transcription.text[1:]
             query_word.is_translate = True
-        else:
-            query_word = Word(en=word, ru=translate_text.text, transcription=transcription.text[1:])
-            session.add(query_word)
+
         session.commit()
     return query_word
 

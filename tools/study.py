@@ -65,7 +65,7 @@ class StudyBot:
             user_id,
             f'Right answer: ||{self.text_fix(next_word.ru.center(20, "_"))}||',
             parse_mode='MarkdownV2'
-                                )
+        )
 
         markups2 = types.InlineKeyboardMarkup()
         btn_right = types.InlineKeyboardButton('✅ right', callback_data='study_right')
@@ -76,6 +76,9 @@ class StudyBot:
 
 
 class StudyWords:
+    """
+    Generator words for study. Also count statistics.
+    """
     __dictionary = []
     __last_word = None
     __fails_count = {}
@@ -89,33 +92,46 @@ class StudyWords:
         random.shuffle(self.__dictionary)
 
     def __last_fail(self):
+        """
+        Count haw many answers ware failure.
+        """
         if self.__fails_count.get(self.__last_word) is None:
             self.__fails_count[self.__last_word] = 1
         else:
             self.__fails_count[self.__last_word] += 1
-
         self.__total_fails += 1
 
     def answer_is_fail(self):
+        """
+        Set last answer as failure and add this word in end __dictionary
+        """
         if self.__last_word is not None:
             self.__dictionary.append(self.__last_word)
             self.__last_fail()
             self.__last_word = None
 
     def __next__(self):
+        """
+        Generate words from __dictionary for study
+        :return: first place word from __dictionary
+        """
         if len(self.__dictionary) == 0:
             return None
         self.__last_word = self.__dictionary.pop(0)
         return self.__last_word
 
     def get_stats(self):
+        """
+        Return study's statistics
+        :return:
+        """
         in_dict = len(self.__dictionary)
         if self.__last_word is not None:
             in_dict += 1
         return self.__total_words, in_dict, self.__total_fails, self.__fails_count
 
     def count(self):
+        """
+        Return length words in __dictionary
+        """
         return len(self.__dictionary)
-
-
-

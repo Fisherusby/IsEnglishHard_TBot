@@ -5,7 +5,8 @@ from tools.translate import get_translate, get_voice_word, create_user, add_word
     get_word, clear_sentence, bolt_word
 from tools.files import dict_to_file
 from tools.study import StudyBot
-from tools.markups import main_menu_markups, empty_markups
+from tools.markups import main_menu_markups, empty_markups, dict_menu_markups, stop_add_menu_markups
+from tools.userstatus import UserStatus
 
 
 API_TOKEN = os.environ.get('BOT_API_TOKEN')
@@ -21,6 +22,8 @@ bot = telebot.TeleBot(API_TOKEN, parse_mode=None)
 
 # set study object
 study_bot = StudyBot(bot)
+
+user_status = UserStatus()
 
 
 @bot.message_handler(commands=['start'])
@@ -112,6 +115,21 @@ def add_word(message):
             bot.send_message(message.chat.id, f'ERROR add word:\n {w}')
 
 
+@bot.message_handler(commands=['dictionary'])
+def dictionary(message):
+    bot.send_message(message.chat.id, "Ваш словарь", reply_markup=dict_menu_markups)
+
+
+@bot.message_handler(commands=['addwords'])
+def addwords(message):
+    bot.send_message(
+        message.chat.id,
+        "Напишите новые слова или по одному или каждый на новой строке",
+        reply_markup=stop_add_menu_markups
+    )
+    user_status.set_value(message.chat.id, 'addwords', True)
+
+
 @bot.message_handler(commands=['showall'])
 def show_all(message):
     all_words = get_user_dictionary(message.chat.id)
@@ -146,9 +164,22 @@ def get_dict(message):
 
 @bot.message_handler(func=lambda m: True)
 def echo_all(message):
-    markups = types.ReplyKeyboardMarkup(row_width=1)
-    menu_btn = types.KeyboardButton('/menu')
-    markups.row(menu_btn)
+    if user_status.get_value(message.chat.id, 'addwords') is True:
+        words = list(map(lambda x: x.lstrip().rsplit()[0], message.text.split('\n')))
+        print(words)
+        for w in words:
+            tr = get_translate(w)
+            if tr:
+                audio = get_voice_word(w)
+                bot.send_voice(message.chat.id, audio, caption=f'ADD:\n {tr.en} {tr.transcription} - {tr.ru}')
+
+                add_word_dictionary(message.chat.id, tr)
+            else:
+                bot.send_message(message.chat.id, f'ERROR add word:\n {w}')
+
+    # markups = types.ReplyKeyboardMarkup(row_width=1)
+    # menu_btn = types.KeyboardButton('/menu')
+    # markups.row(menu_btn)
     # bot.reply_to(message, message.text, reply_markup=markups).
     print(f'{message.chat.id = } , {message.text = }')
 
